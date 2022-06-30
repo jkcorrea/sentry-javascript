@@ -474,4 +474,41 @@ describe('Span', () => {
       expect(baggage && getThirdPartyBaggage(baggage)).toStrictEqual('');
     });
   });
+
+  describe('setSource', () => {
+    test('does not set a source by default', () => {
+      const spy = jest.spyOn(hub as any, 'captureEvent') as any;
+      const transaction = new Transaction({ name: 'test', sampled: true });
+      expect(spy).toHaveBeenCalledTimes(0);
+
+      transaction.finish();
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenLastCalledWith(
+        expect.not.objectContaining({
+          transaction_info: {
+            source: 'route',
+          },
+        }),
+      );
+    });
+
+    test('sets the source of a transaction', () => {
+      const spy = jest.spyOn(hub as any, 'captureEvent') as any;
+      const transaction = new Transaction({ name: 'test', sampled: true });
+      expect(spy).toHaveBeenCalledTimes(0);
+
+      transaction.setSource('route');
+      transaction.finish();
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          transaction_info: {
+            source: 'route',
+          },
+        }),
+      );
+    });
+  });
 });

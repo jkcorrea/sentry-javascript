@@ -91,6 +91,9 @@ export interface Transaction extends TransactionContext, Span {
 
   /** return the baggage for dynamic sampling and trace propagation */
   getBaggage(): Baggage;
+
+  /** Set source of how the name of the transaction was determined */
+  setSource(source: TransactionSource): void;
 }
 
 /**
@@ -139,3 +142,13 @@ export interface TransactionMetadata {
   /** For transactions tracing server-side request handling, the path of the request being tracked. */
   requestPath?: string;
 }
+
+export type TransactionSource =
+  | 'custom'
+  | 'url'
+  | 'raw-url-fallback'
+  | 'route'
+  | 'view'
+  | 'unknown'
+  | 'component'
+  | 'task';

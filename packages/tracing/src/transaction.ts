@@ -8,6 +8,7 @@ import {
   Transaction as TransactionInterface,
   TransactionContext,
   TransactionMetadata,
+  TransactionSource,
 } from '@sentry/types';
 import { createBaggage, dropUndefinedKeys, getSentryBaggageItems, isBaggageMutable, logger } from '@sentry/utils';
 
@@ -27,6 +28,8 @@ export class Transaction extends SpanClass implements TransactionInterface {
   private _measurements: Measurements = {};
 
   private _trimEnd?: boolean;
+
+  private _source?: TransactionSource;
 
   /**
    * This constructor should never be called manually. Those instrumenting tracing should use
@@ -136,6 +139,11 @@ export class Transaction extends SpanClass implements TransactionInterface {
         ...this.metadata,
         baggage: this.getBaggage(),
       },
+      ...(this._source && {
+        transaction_info: {
+          source: this._source,
+        },
+      }),
     };
 
     const hasMeasurements = Object.keys(this._measurements).length > 0;
@@ -199,6 +207,18 @@ export class Transaction extends SpanClass implements TransactionInterface {
     this.metadata.baggage = finalBaggage;
 
     return finalBaggage;
+  }
+
+  /**
+   *
+   * @inheritDoc
+   *
+   * @experimental
+   *
+   * @param source
+   */
+  public setSource(source: TransactionSource): void {
+    this._source = source;
   }
 
   /**
